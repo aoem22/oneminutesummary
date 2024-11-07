@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     // Upload to Supabase
     const fileName = `${videoId}.mp3`
-    const { data, error } = await supabase
+    const { error } = await supabase
       .storage
       .from('youtube-audio')
       .upload(fileName, audioFile, {
@@ -72,11 +72,12 @@ export async function POST(request: Request) {
       publicUrl: supabase.storage.from('youtube-audio').getPublicUrl(fileName).data.publicUrl
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Download error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to download video'
     return NextResponse.json(
-      { error: error.message || 'Failed to download video' },
-      { status: error.statusCode || 500 }
+      { error: errorMessage },
+      { status: 500 }
     )
   }
 }
